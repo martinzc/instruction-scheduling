@@ -1,4 +1,4 @@
-class ILOCOperation:
+class ILOCOperation(object):
     def __init__(self, idx=-1, opcode=None, op1=None, op2=None, op3=None):
         self.idx = idx
         self.opcode = opcode
@@ -6,6 +6,7 @@ class ILOCOperation:
         self.op2 = op2
         self.op3 = op3
         self.comment = None
+        self.priority = None
 
     def get_vr_str(self):
         arr = [self.opcode]
@@ -44,6 +45,12 @@ class ILOCOperation:
             arr.append('=> ' + self.op3.sr)
 
         return ' '.join(arr)
+
+    def __cmp__(self, other):
+        if self.priority == other.priority:
+            return 0
+
+        return 1 if self.priority < other.priority else -1
 
 
 class ILOCOperand:

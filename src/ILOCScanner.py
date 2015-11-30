@@ -11,7 +11,7 @@ class ILOCScanner:
     def scan_file(self, file_name):
         operations = LinkedList()
         with open(file_name) as f:
-            i = 0
+            i = 1
             for line in f:
                 operation = self._parse_line(line)
                 if operation is not None:
