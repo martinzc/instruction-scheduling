@@ -170,7 +170,7 @@ class Scheduler():
                 if operation is None:
                     self.f[idx].append('nop')
                 else:
-                    self.f[idx].append(str(operation))
+                    self.f[idx].append(operation.get_vr_str())
                     self.schedule[operation] = cycle
                     active.append(operation)
 
