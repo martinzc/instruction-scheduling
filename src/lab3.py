@@ -2,6 +2,7 @@ from os import path
 from sys import argv, stderr
 
 import ILOCScanner
+from scheduler import Scheduler
 
 
 HELP = '''
@@ -25,9 +26,13 @@ def main():
 
         scanner = ILOCScanner()
         operations, src_regs = scanner.scan_file(argv[2])
-
+        scheduler = Scheduler(operations, src_regs)
+        scheduler.rename_regs()
+        scheduler.build_dependence_graph()
+        scheduler.perform()
     else:
         print('Wrong arguments.')
+
 
 if __name__ == '__main__':
     try:
