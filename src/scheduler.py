@@ -99,9 +99,9 @@ class Scheduler():
             dependence.add(sinks[op3.vr])
             if sinks['store'] is not None:
                 dependence.add(sinks['store'])
-            elif sinks['output'] is not None:
+            if sinks['output'] is not None:
                 dependence.add(sinks['output'])
-            elif sinks['load'] is not None:
+            if sinks['load'] is not None:
                 dependence.add(sinks['load'])
 
         if op1 and op1.sr.isdigit() is False and op1.vr in sinks:
