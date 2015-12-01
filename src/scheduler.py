@@ -93,7 +93,7 @@ class Scheduler():
         elif opcode == 'output':
             if sinks['store'] is not None:
                 dependence.add(sinks['store'])
-            elif sinks['output'] is not None:
+            if sinks['output'] is not None:
                 dependence.add(sinks['output'])
         elif opcode == 'store':
             dependence.add(sinks[op3.vr])
