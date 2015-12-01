@@ -1,0 +1,63 @@
+#!/bin/bash
+python2.7 lab3.py report/report01.i > out01.i
+python2.7 lab3.py report/report02.i > out02.i
+python2.7 lab3.py report/report03.i > out03.i
+python2.7 lab3.py report/report04.i > out04.i
+python2.7 lab3.py report/report05.i > out05.i
+python2.7 lab3.py report/report06.i > out06.i
+python2.7 lab3.py report/report07.i > out07.i
+python2.7 lab3.py report/report08.i > out08.i
+python2.7 lab3.py report/report09.i > out09.i
+python2.7 lab3.py report/report10.i > out10.i
+python2.7 lab3.py report/report11.i > out11.i
+python2.7 lab3.py report/report12.i > out12.i
+python2.7 lab3.py report/report13.i > out13.i
+python2.7 lab3.py report/report14.i > out14.i
+python2.7 lab3.py report/report15.i > out15.i
+python2.7 lab3.py report/report16.i > out16.i
+python2.7 lab3.py report/report17.i > out17.i
+python2.7 lab3.py report/report18.i > out18.i
+python2.7 lab3.py report/report19.i > out19.i
+python2.7 lab3.py report/report20.i > out20.i
+
+SIM=/clear/courses/comp412/students/lab3/sim
+echo "===========01==============" > out.txt
+$SIM -s 1 -i 2000 0 1 2 3 4 5 < out01.i >> out.txt
+echo "===========02==============" >> out.txt
+$SIM -s 1 -i 2000 0 1 2 3 4 5 < out02.i >> out.txt
+echo "===========03==============" >> out.txt
+$SIM -s 1 -i 2000 0 1 2 3 4 5 6 < out03.i >> out.txt
+echo "===========04==============" >> out.txt
+$SIM -s 1 -i 1024 5 9 < out04.i >> out.txt
+echo "===========05==============" >> out.txt
+$SIM -s 1 -i 2000 10 < out05.i >> out.txt
+echo "===========06==============" >> out.txt
+$SIM -s 1 -i 1024 1 1 < out06.i >> out.txt
+echo "===========07==============" >> out.txt
+$SIM -s 1 < out07.i >> out.txt
+echo "===========08==============" >> out.txt
+$SIM -s 1 < out08.i >> out.txt
+echo "===========09==============" >> out.txt
+$SIM -s 1 -i 2000 1000 7 < out09.i >> out.txt
+echo "===========10==============" >> out.txt
+$SIM -s 1 -i 1024 0 1 < out10.i >> out.txt
+echo "===========11==============" >> out.txt
+$SIM -s 1 -i 1024 0 1 < out11.i >> out.txt
+echo "===========12==============" >> out.txt
+$SIM -s 1 -i 1024 20 26 0 6 < out12.i >> out.txt
+echo "===========13==============" >> out.txt
+$SIM -s 1 -i 2016 4 < out13.i >> out.txt
+echo "===========14==============" >> out.txt
+$SIM -s 1 < out14.i >> out.txt
+echo "===========15==============" >> out.txt
+$SIM -s 1 < out15.i >> out.txt
+echo "===========16==============" >> out.txt
+$SIM -s 1 -i 1024 1056 1052 1048 1044 1040 1036 1032 1028 1024 < out16.i >> out.txt
+echo "===========17==============" >> out.txt
+$SIM -s 1 -i 1024 100 2 3 4 < out17.i >> out.txt
+echo "===========18==============" >> out.txt
+$SIM -s 1 -i 1000 8 < out18.i >> out.txt
+echo "===========19==============" >> out.txt
+$SIM -s 1 < out19.i >> out.txt
+echo "===========20==============" >> out.txt
+$SIM -s 1 -i 1024 3 5 < out20.i >> out.txt
