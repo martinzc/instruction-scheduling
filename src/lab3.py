@@ -25,7 +25,7 @@ def main():
             raise IOError('Could not find the file {}.'.format(argv[1]))
 
         scanner = ILOCScanner()
-        operations, src_regs = scanner.scan_file(argv[2])
+        operations, src_regs = scanner.scan_file(argv[1])
         scheduler = Scheduler(operations, src_regs)
         scheduler.rename_regs()
         scheduler.build_dependence_graph()
