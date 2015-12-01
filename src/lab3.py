@@ -1,8 +1,8 @@
 from os import path
 from sys import argv, stderr
 
-import ILOCScanner
 from scheduler import Scheduler
+from ILOCScanner import ILOCScanner
 
 
 HELP = '''
