@@ -23,6 +23,8 @@ class Scheduler():
         self.schedule = {}
         self.out_degrees = None
         self.reverse_graph = {}
+        self.vals = {}
+        self.dependency_vals = {}
 
     def rename_regs(self):
         node = self.operations.tail
@@ -64,24 +66,72 @@ class Scheduler():
 
     def build_dependence_graph(self):
         node = self.operations.head
+        loads = set()
+        outputs = set()
         sinks = {'store': None, 'output': None, 'load': None}
         while node is not None:
-            dependence = self.get_dependence(node, sinks)
+            dependence = self.get_dependence(node, sinks, loads, outputs)
             self.graph[node.val] = dependence
             if node.val.opcode == 'store':
                 sinks['store'] = node.val
             elif node.val.opcode == 'output':
                 sinks['output'] = node.val
+                outputs.add(node.val)
             elif node.val.opcode == 'load':
                 sinks['load'] = node.val
+                loads.add(node.val)
 
             if node.val.op3:
+                self.track_reg(node.val)
                 sinks[node.val.op3.vr] = node.val
+
             node = node.next
 
         self.init_priority()
 
-    def get_dependence(self, node, sinks):
+    def track_reg(self, operation):
+        opcode = operation.opcode
+        op1 = operation.op1
+        op2 = operation.op2
+        op3 = operation.op3
+
+        if opcode == 'loadI':
+            self.vals[op3.vr] = op1.sr
+        elif opcode == 'load':
+            if op1.vr in self.vals:
+                addr = self.vals[op1.vr]
+                self.dependency_vals[operation] = addr
+                if addr in self.vals:
+                    self.vals[op3.vr] = self.vals[addr]
+        elif opcode == 'store':
+            if op3.vr in self.vals:
+                addr = self.vals[op3.vr]
+                self.dependency_vals[operation] = addr
+                if op1.vr in self.vals:
+                    self.vals[addr] = self.vals[op1.vr]
+        elif opcode == 'add':
+            if op1.vr in self.vals and op2.vr in self.vals:
+                self.vals[op3.vr] = self.vals[op1.vr] + self.vals[op2.vr]
+        elif opcode == 'sub':
+            if op1.vr in self.vals and op2.vr in self.vals:
+                self.vals[op3.vr] = self.vals[op1.vr] - self.vals[op2.vr]
+        elif opcode == 'mult':
+            if op1.vr in self.vals and op2.vr in self.vals:
+                self.vals[op3.vr] = self.vals[op1.vr] * self.vals[op2.vr]
+        elif opcode == 'lshift':
+            if op1.vr in self.vals and op2.vr in self.vals:
+                self.vals[op3.vr] = self.vals[op1.vr] << self.vals[op2.vr]
+        elif opcode == 'rshift':
+            if op1.vr in self.vals and op2.vr in self.vals:
+                self.vals[op3.vr] = self.vals[op1.vr] << self.vals[op2.vr]
+
+    def is_dependence(self, addr1, addr2):
+        if addr1 and addr2:
+            return True if addr1 == addr2 else False
+
+        return True
+
+    def get_dependence(self, node, sinks, loads, outputs):
         opcode = node.val.opcode
         op1 = node.val.op1
         op2 = node.val.op2
@@ -89,20 +139,41 @@ class Scheduler():
 
         dependence = set()
         if opcode == 'load' and sinks['store'] is not None:
-            dependence.add(sinks['store'])
+            # check store op3's value == load op1's value
+            store_addr = self.vals[sinks['store'].op3.vr] if sinks['store'].op3.vr in self.vals else None
+            load_op1 = self.vals[op1.vr] if op1.vr in self.vals else None
+            if self.is_dependence(store_addr, load_op1):
+                dependence.add(sinks['store'])
         elif opcode == 'output':
             if sinks['store'] is not None:
-                dependence.add(sinks['store'])
+                # check store op3's value
+                store_addr = self.vals[sinks['store'].op3.vr] if sinks['store'].op3.vr in self.vals else None
+                if self.is_dependence(store_addr, op1.sr):
+                    dependence.add(sinks['store'])
             if sinks['output'] is not None:
                 dependence.add(sinks['output'])
         elif opcode == 'store':
             dependence.add(sinks[op3.vr])
             if sinks['store'] is not None:
-                dependence.add(sinks['store'])
+                # check store op3's value == store op3's value
+                store_addr1 = self.vals[sinks['store'].op3.vr] if sinks['store'].op3.vr in self.vals else None
+                store_addr2 = self.vals[op3.vr] if op3.vr in self.vals else None
+                if self.is_dependence(store_addr1, store_addr2):
+                    dependence.add(sinks['store'])
             if sinks['output'] is not None:
-                dependence.add(sinks['output'])
+                # check store op3's value == output op1
+                store_addr = self.vals[op3.vr] if op3.vr in self.vals else None
+                for output_op in outputs:
+                    output_addr = output_op.op1.sr
+                    if self.is_dependence(store_addr, output_addr):
+                        dependence.add(output_op)
             if sinks['load'] is not None:
-                dependence.add(sinks['load'])
+                # check store op3's value == load op1's value
+                store_addr = self.vals[op3.vr] if op3.vr in self.vals else None
+                for load_op in loads:
+                    load_addr = self.vals[load_op.op1.vr] if load_op.op1.vr in self.vals else None
+                    if self.is_dependence(store_addr, load_addr):
+                        dependence.add(load_op)
 
         if op1 and op1.sr.isdigit() is False and op1.vr in sinks:
             dependence.add(sinks[op1.vr])
@@ -113,7 +184,7 @@ class Scheduler():
         return dependence
 
     def to_graph(self):
-        nodes = ['{0} [label=\"{0} {1} Priority: {2}\"]'.format(operation.idx, str(operation), operation.priority) for
+        nodes = ['{0} [label=\"{0} {1} Priority: {2}\"]'.format(operation.idx, operation, operation.priority) for
                  operation in self.graph.keys()]
         str_nodes = ';\n    '.join(nodes)
 
@@ -170,7 +241,7 @@ class Scheduler():
                 if operation is None:
                     self.f[idx].append('nop')
                 else:
-                    self.f[idx].append(operation.get_vr_str())
+                    self.f[idx].append(operation)
                     self.schedule[operation] = cycle
                     active.append(operation)
 
@@ -188,7 +259,9 @@ class Scheduler():
 
         length = len(self.f[0])
         for i in range(length):
-            print('[{0}; {1}]'.format(self.f[0][i], self.f[1][i]))
+            f0 = self.f[0][i] if isinstance(self.f[0][i], str) else self.f[0][i].get_vr_str()
+            f1 = self.f[1][i] if isinstance(self.f[1][i], str) else self.f[1][i].get_vr_str()
+            print('[{0}; {1}]'.format(f0, f1))
 
     def get_operation(self, idx, ready):
         temp = []
