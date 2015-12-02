@@ -144,10 +144,16 @@ class Scheduler():
         dependence = set()
         if opcode == 'load' and sinks['store'] is not None:
             # check store op3's value == load op1's value
-            store_addr = self.vals[sinks['store'].op3.vr] if sinks['store'].op3.vr in self.vals else None
-            load_op1 = self.vals[op1.vr] if op1.vr in self.vals else None
-            if self.is_dependence(store_addr, load_op1):
-                dependence.add(sinks['store'])
+            # store_addr = self.vals[sinks['store'].op3.vr] if sinks['store'].op3.vr in self.vals else None
+            # load_op1 = self.vals[op1.vr] if op1.vr in self.vals else None
+            # if self.is_dependence(store_addr, load_op1):
+            #     dependence.add(sinks['store'])
+            for store_op in reversed(stores):
+                store_addr = self.vals[store_op.op3.vr] if store_op.op3.vr in self.vals else None
+                load_addr = self.vals[op1.vr] if op1.vr in self.vals else None
+                if self.is_dependence(store_addr, load_addr):
+                    dependence.add(store_op)
+                    break
         elif opcode == 'output':
             if sinks['store'] is not None:
                 # check store op3's value
