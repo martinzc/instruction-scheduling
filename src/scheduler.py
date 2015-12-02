@@ -100,13 +100,13 @@ class Scheduler():
         elif opcode == 'load':
             if op1.vr in self.vals:
                 addr = self.vals[op1.vr]
-                self.dependency_vals[operation] = addr
+                self.dependency_vals[operation] = int(addr)
                 if addr in self.vals:
                     self.vals[op3.vr] = self.vals[addr]
         elif opcode == 'store':
             if op3.vr in self.vals:
                 addr = self.vals[op3.vr]
-                self.dependency_vals[operation] = addr
+                self.dependency_vals[operation] = int(addr)
                 if op1.vr in self.vals:
                     self.vals[addr] = self.vals[op1.vr]
         elif opcode == 'add':
@@ -123,7 +123,7 @@ class Scheduler():
                 self.vals[op3.vr] = int(self.vals[op1.vr]) << int(self.vals[op2.vr])
         elif opcode == 'rshift':
             if op1.vr in self.vals and op2.vr in self.vals:
-                self.vals[op3.vr] = int(self.vals[op1.vr]) << int(self.vals[op2.vr])
+                self.vals[op3.vr] = int(self.vals[op1.vr]) >> int(self.vals[op2.vr])
 
     def is_dependence(self, addr1, addr2):
         if addr1 and addr2:
