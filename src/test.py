@@ -2,7 +2,7 @@ from ILOCScanner import ILOCScanner
 from scheduler import Scheduler
 
 scanner = ILOCScanner()
-operations, src_regs = scanner.scan_file('report/report08.i')
+operations, src_regs = scanner.scan_file('report/report13.i')
 scheduler = Scheduler(operations, src_regs)
 scheduler.rename_regs()
 scheduler.build_dependence_graph()

@@ -68,12 +68,14 @@ class Scheduler():
         node = self.operations.head
         loads = set()
         outputs = set()
+        stores = []
         sinks = {'store': None, 'output': None, 'load': None}
         while node is not None:
-            dependence = self.get_dependence(node, sinks, loads, outputs)
+            dependence = self.get_dependence(node, sinks, loads, outputs, stores)
             self.graph[node.val] = dependence
             if node.val.opcode == 'store':
                 sinks['store'] = node.val
+                stores.append(node.val)
             elif node.val.opcode == 'output':
                 sinks['output'] = node.val
                 outputs.add(node.val)
@@ -133,7 +135,7 @@ class Scheduler():
 
         return True
 
-    def get_dependence(self, node, sinks, loads, outputs):
+    def get_dependence(self, node, sinks, loads, outputs, stores):
         opcode = node.val.opcode
         op1 = node.val.op1
         op2 = node.val.op2
@@ -149,9 +151,11 @@ class Scheduler():
         elif opcode == 'output':
             if sinks['store'] is not None:
                 # check store op3's value
-                store_addr = self.vals[sinks['store'].op3.vr] if sinks['store'].op3.vr in self.vals else None
-                if self.is_dependence(store_addr, op1.sr):
-                    dependence.add(sinks['store'])
+                for store_op in reversed(stores):
+                    store_addr = self.vals[store_op.op3.vr] if store_op.op3.vr in self.vals else None
+                    if self.is_dependence(store_addr, op1.sr):
+                        dependence.add(store_op)
+                        break
             if sinks['output'] is not None:
                 dependence.add(sinks['output'])
         elif opcode == 'store':
