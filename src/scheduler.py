@@ -126,9 +126,9 @@ class Scheduler():
                 self.vals[op3.vr] = int(self.vals[op1.vr]) << int(self.vals[op2.vr])
 
     def is_dependence(self, addr1, addr2):
-        addr1 = int(addr1)
-        addr2 = int(addr2)
         if addr1 and addr2:
+            addr1 = int(addr1)
+            addr2 = int(addr2)
             return True if addr1 == addr2 else False
 
         return True
